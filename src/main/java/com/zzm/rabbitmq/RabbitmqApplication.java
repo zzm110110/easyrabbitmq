@@ -1,11 +1,11 @@
 package com.zzm.rabbitmq;
 
-import com.zzm.rabbitmq.client.RabbitMQClient;
-import org.springframework.amqp.core.Queue;
+import com.zzm.rabbitmq.enums.ExchangeEnum;
+import com.zzm.rabbitmq.enums.QueueEnum;
+import com.zzm.rabbitmq.service.QueueMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.util.StopWatch;
 
 import javax.annotation.PostConstruct;
@@ -16,13 +16,12 @@ import java.util.concurrent.Executors;
 @SpringBootApplication
 public class RabbitmqApplication {
 
+	/**
+	 * 消息队列业务逻辑实现
+	 */
 	@Autowired
-	private RabbitMQClient rabbitMQClient;
+	private QueueMessageService queueMessageService;
 
-	@Bean
-	public Queue tesetQueue(){
-		return new Queue("james");
-	}
 
 	@PostConstruct
 	public void init() {
@@ -43,10 +42,12 @@ public class RabbitmqApplication {
 			executorService.execute(() -> {
 				try {
 					start.await();
-					for (int i1 = 0; i1 < 1000; i1++) {
-						rabbitMQClient.send("发送消息----james-----");
+					for (int i1 = 0; i1 < 20; i1++) {
+						queueMessageService.send(i1,ExchangeEnum.USER_REGISTER, QueueEnum.USER_REGISTER);
 					}
 				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
 					end.countDown();
